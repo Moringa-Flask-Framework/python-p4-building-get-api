@@ -19,5 +19,44 @@ db.init_app(app)
 def index():
     return "Index for Game/Review/User API"
 
+@app.route('/games')
+def games():
+    """Return all available games as a JSON object"""
+    games= []
+    db_games= Game.query.all()
+    for game in db_games:
+        game_dict= {
+            "title": game.title,
+            "genre": game.genre,
+            "platform": game.platform,
+            "price": game.price,
+        }
+        games.append(game_dict)
+    response= make_response(jsonify(games), 200, {"Content-Type": "application/json"})
+    return response
+
+#getting json data by id
+@app.route('/games/<int:id>')
+def game_by_id(id):
+    game= Game.query.filter(Game.id==id).first()
+    '''
+    game_dict= {
+        "id": game.id,
+        "title": game.title,
+        "genre": game.genre,
+        "platform": game.price
+    }
+    '''
+    game_dict= game.to_dict()
+    if not game:
+        response= make_response({"error":"No such game exists"},404)
+        return response
+    else:
+        response= make_response(jsonify(game_dict),200)
+        return response
+    
+#accessing associated data
+    """We will add a serializer to the models"""
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
